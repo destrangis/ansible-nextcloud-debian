@@ -1,0 +1,27 @@
+---
+# tasks file for nc_selfsignedcert
+- name: Ensure certificates directory
+  become: yes
+  file:
+     dest: "{{certificate_path}}/{{ server_hostname }}/"
+     state: directory
+
+- name: Generate an OpenSSL private key.
+  become: yes
+  openssl_privatekey:
+    path: "{{certificate_path}}/{{ server_hostname }}/privkey.key"
+
+- name: Generate an OpenSSL CSR.
+  become: yes
+  openssl_csr:
+    path: "{{certificate_path}}/{{ server_hostname }}.csr"
+    privatekey_path: "{{certificate_path}}/{{ server_hostname }}/privkey.key"
+    common_name: "{{ server_hostname }}"
+
+- name: Generate a Self Signed OpenSSL certificate.
+  become: yes
+  openssl_certificate:
+    path: "{{certificate_path}}/{{ server_hostname }}/certificate.crt"
+    privatekey_path: "{{certificate_path}}/{{ server_hostname }}/privkey.key"
+    csr_path: "{{certificate_path}}/{{ server_hostname }}.csr"
+    provider: selfsigned

@@ -1,0 +1,31 @@
+---
+# tasks file for nc_postgres
+- name: Require local users to use md5 passwords
+  replace:
+     path: "/etc/postgresql/9.6/main/pg_hba.conf"
+     regexp: '^[^#\n]*local\s+all\s+all\s+peer\s*$'
+     replace: "local   all    all   md5"
+  register: repl_output
+  become: yes
+
+- name: Restart Postgres
+  systemd:
+    name: postgresql
+    state: restarted
+  become: yes
+
+- name: Create user for nextcloud database
+  postgresql_user:
+     name: "{{ pg_username }}"
+     password: "{{ pg_password }}"
+  become_user: postgres
+  become: yes
+
+- name: Create the nextcloud database
+  postgresql_db:
+     name: nextcloud
+     owner: "{{ pg_username }}"
+  become_user: postgres
+  become: yes
+
+

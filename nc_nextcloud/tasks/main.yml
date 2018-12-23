@@ -1,0 +1,94 @@
+---
+# tasks file for nc_nextcloud
+
+- name: Delete directory /opt/nextcloud if present
+  become: yes
+  file:
+     path: /opt/nextcloud/
+     state: absent
+
+- name: Download nextcloud and unzip to /opt
+  become: yes
+  unarchive:
+     #src: "{{nextcloud_zip}}"
+     dest: /opt
+     remote_src: yes
+     src: "{{nextcloud_releases}}/{{nextcloud_zip}}"
+
+- name: Change owner to www-data
+  become: yes
+  file:
+     path: /opt/nextcloud/
+     owner: www-data
+     group: www-data
+     recurse: yes
+
+- name: Create data directory
+  become: yes
+  file:
+     dest: /oc/files/
+     state: directory
+     owner: www-data
+     group: www-data
+
+- name: Install nextcloud
+  become_user: www-data
+  become: yes
+  command:
+      argv:
+        - php
+        - /opt/nextcloud/occ
+        - maintenance:install
+        - --database=pgsql
+        - --database-name=nextcloud
+        - --database-user={{pg_username}}
+        - --database-pass={{pg_password}}
+        - --admin-user={{nc_admin}}
+        - --admin-pass={{nc_password}}
+        - --data-dir=/oc/files
+
+- name: Add trusted_domains to config.php
+  become_user: www-data
+  become: yes
+  replace:
+     path: /opt/nextcloud/config/config.php
+     regexp: "^\\s*array[\\ \\n]*\\([^)]*\\)[\\ \\n]*,.*$"
+     replace: |
+         array (
+           0 => 'localhost',
+           1 => '{{inventory_hostname}}',
+           2 => '{{hostvars[inventory_hostname]['ansible_enp0s3']['ipv4']['address']}}',
+         ),
+
+- name: Add personalised settings to config.php
+  become_user: www-data
+  become: yes
+  lineinfile:
+     path: /opt/nextcloud/config/config.php
+     insertbefore: "^\\s*\\);\\s*$"
+     line: "{{ item.key }} => {{ item.value}},"
+  with_items: "{{ config_settings }}"
+
+- name: Edit php.ini
+  become: yes
+  blockinfile:
+     path: /etc/php/7.0/apache2/php.ini
+     insertafter: "^\\s*\\[opcache\\]\\s*$"
+     block: |
+        opcache.enable=1
+        opcache.enable_cli=1
+        opcache.interned_strings_buffer=8
+        opcache.max_accelerated_files=10000
+        opcache.memory_consumption=128
+        opcache.save_comments=1
+        opcache.revalidate_freq=1
+
+- name: Convert to bigints
+  become_user: www-data
+  become: yes
+  command:
+    stdin: y
+    argv:
+    - php
+    - /opt/nextcloud/occ
+    - db:convert-filecache-bigint

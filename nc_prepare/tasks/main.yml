@@ -1,0 +1,15 @@
+---
+# tasks file for nc_prepare
+- name: Upgrade the system packages
+  apt:
+     update-cache: yes
+     upgrade: full
+     autoremove: yes
+     cache_valid_time: 86400
+  become: yes
+
+- name: Install package dependencies
+  apt:
+     state: latest
+     name: "{{ needed_packages }}"
+  become: yes

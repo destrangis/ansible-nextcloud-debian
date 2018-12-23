@@ -1,0 +1,72 @@
+---
+# tasks file for nc_apache
+- name: Upload nextcloud.conf
+  copy:
+      dest: /etc/apache2/sites-available
+      src: nextcloud.conf
+  become: yes
+
+- name: Create /var/www/nextcloud directory
+  become: yes
+  file:
+    dest: /var/www/nextcloud
+    state: directory
+    owner: www-data
+    group: www-data
+
+- name: Upload index.html
+  template:
+      dest: /var/www/nextcloud/index.html
+      src:  index.html.j2
+      owner: www-data
+      group: www-data
+  become: yes
+
+- name: Create log directories
+  file:
+      dest: /var/log/apache2/nextcloud/
+      state: directory
+      owner: www-data
+      group: www-data
+  become: yes
+
+- name: Copy SSL Key
+  become: yes
+  copy:
+     remote_src: yes
+     src: "{{certificate_path}}/{{ server_hostname }}/privkey.key"
+     dest: /etc/apache2/nextcloud.key
+
+- name: Copy SSL Certificate
+  become: yes
+  copy:
+     remote_src: yes
+     dest: /etc/apache2/nextcloud.cert
+     src: "{{certificate_path}}/{{ server_hostname }}/certificate.crt"
+
+
+- name: Add hostname to /etc/hosts
+  become: yes
+  lineinfile:
+      path: /etc/hosts
+      state: present
+      insertafter: "^{{hostvars[inventory_hostname]['ansible_enp0s3']['ipv4']['address']}}.*$"
+      line: "{{hostvars[inventory_hostname]['ansible_enp0s3']['ipv4']['address']}}    {{inventory_hostname}}"
+
+
+- name: Enable modules
+  become: yes
+  apache2_module:
+      state: present
+      name: "{{item}}"
+  with_items: "{{ apache_modules }}"
+
+- name: Enable site
+  become: yes
+  command: a2ensite nextcloud
+
+- name: Restart apache
+  become: yes
+  systemd:
+     name: apache2
+     state: restarted

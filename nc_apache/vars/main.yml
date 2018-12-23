@@ -1,0 +1,9 @@
+---
+# vars file for nc_apache
+apache_modules:
+  - ssl
+  - rewrite
+  - headers
+  - env
+  - dir
+  - mime

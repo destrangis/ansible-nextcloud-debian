@@ -1,0 +1,4 @@
+---
+# vars file for nc_selfsignedcert
+certificate_path: /usr/local/etc/ssl_certificates
+server_hostname: "{{inventory_hostname}}"

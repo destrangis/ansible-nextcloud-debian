@@ -1,0 +1,33 @@
+- hosts: all
+  vars:
+     certificate_path: /usr/local/etc/ssl_certificates
+     pg_username: ncuser
+     pg_password: dbpasssss99
+     nc_admin: ncadmin
+     nc_password: firstpass3343
+     nextcloud_sw: nextcloud-15.0.0
+     nextcloud_zip: "{{nextcloud_sw}}.zip"
+     nextcloud_releases: https://download.nextcloud.com/server/releases/
+
+     config_settings:
+          - { "key": "'memcache.local'", "value": "'\\OC\\Memcache\\APCu'" }
+
+            # notification email settings
+          - { "key": "'mail_smtpmode'", "value": "'smtp'" }
+          - { "key": "'mail_sendmailmode'", "value": "'smtp'" }
+          - { "key": "'mail_smtphost'", "value": "'smtp.someserver.com'" }
+          # - { "key": "'mail_smtpport'", "value": "'465'" }  # specify if different
+          # - { "key": "'mail_smtpauth'", "value": "1" }    # auth required
+          # - { "key": "'mail_smtpsecure'", "value": "'ssl'" }  # method to secure ssl/starttls
+          # - { "key": "'mail_smtpauthtype'", "value": "'LOGIN'" } # auth type
+          # - { "key": "'mail_smtpname'", "value": "'myuser'" }
+          # - { "key": "'mail_smtppassword'", "value": "'mypassword'" }
+          - { "key": "'mail_from_address'", "value": "'nextcloud'" }  # nextcloud@destrangis.com
+          - { "key": "'mail_domain'", "value": "'destrangis.com'" }
+
+  roles:
+    - nc_prepare
+    - nc_postgres
+    - nc_nextcloud
+    - nc_selfsignedcert
+    - nc_apache
