@@ -1,11 +1,11 @@
-- hosts: all
+- hosts: nextcloud_servers
   vars:
      certificate_path: /usr/local/etc/ssl_certificates
      pg_username: ncuser
      pg_password: dbpasssss99
      nc_admin: ncadmin
      nc_password: firstpass3343
-     nextcloud_sw: nextcloud-15.0.0
+     nextcloud_sw: nextcloud-15.0.2
      nextcloud_zip: "{{nextcloud_sw}}.zip"
      nextcloud_releases: https://download.nextcloud.com/server/releases/
 
@@ -29,5 +29,7 @@
     - nc_prepare
     - nc_postgres
     - nc_nextcloud
-    - nc_selfsignedcert
+    #- nc_selfsignedcert
+    - nc_certbot
     - nc_apache
+    - nc_rsync

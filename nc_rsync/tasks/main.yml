@@ -1,0 +1,20 @@
+---
+# tasks file for nc_rsync
+- name: Install rsync
+  apt:
+    name: rsync
+    state: latest
+  become: yes
+
+- name: Install rsyncd.conf
+  copy:
+     src: rsyncd.conf
+     dest: /etc/rsyncd.conf
+  become: yes
+
+- name: Activate rsync service
+  become: yes
+  systemd:
+    name: rsync
+    enabled: yes
+    state: started

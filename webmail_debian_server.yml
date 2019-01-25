@@ -1,0 +1,67 @@
+- hosts: webmail_servers
+  vars:
+     roundcube_software:
+        - roundcube-core
+        - roundcube-pgsql
+        - roundcube-plugins
+        - roundcube
+  tasks:
+    - name: Install roundcube
+      apt:
+         name: "{{ roundcube_software }}"
+         state: latest
+      become: yes
+
+    - name: Upload roundcube configuration
+      copy:
+         src: config.inc.php
+         dest: /etc/roundcube/config.inc.php
+      become: yes
+
+    - name: Upload apache webmail configuration
+      copy:
+         src: webmail.conf
+         dest: /etc/apache2/sites-available/webmail.conf
+      become: yes
+
+    - name: Create /var/www/webmail directory
+      become: yes
+      file:
+        dest: /var/www/webmail
+        state: directory
+        owner: www-data
+        group: www-data
+
+    - name: Create log directories
+      file:
+          dest: /var/log/apache2/webmail/
+          state: directory
+          owner: www-data
+          group: www-data
+      become: yes
+
+    - name: Upload index.html
+      template:
+         dest: /var/www/webmail/index.html
+         src:  webm_index.html.j2
+         owner: www-data
+         group: www-data
+      become: yes
+
+    - name: Add hostname to /etc/hosts
+      become: yes
+      lineinfile:
+          path: /etc/hosts
+          state: present
+          insertafter: "^{{hostvars[inventory_hostname]['ansible_enp0s3']['ipv4']['address']}}.*$"
+          line: "{{hostvars[inventory_hostname]['ansible_enp0s3']['ipv4']['address']}}    {{inventory_hostname}}"
+
+    - name: Enable webmail site
+      become: yes
+      command: a2ensite webmail
+
+    - name: Reload apache configuration
+      systemd:
+          name: apache2
+          state: restarted
+      become: yes

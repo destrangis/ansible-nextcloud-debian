@@ -30,19 +30,19 @@
       group: www-data
   become: yes
 
-- name: Copy SSL Key
-  become: yes
-  copy:
-     remote_src: yes
-     src: "{{certificate_path}}/{{ server_hostname }}/privkey.key"
-     dest: /etc/apache2/nextcloud.key
+#- name: Copy SSL Key
+  #become: yes
+  #copy:
+     #remote_src: yes
+     #src: "{{certificate_path}}/{{ server_hostname }}/privkey.key"
+     #dest: /etc/apache2/nextcloud.key
 
-- name: Copy SSL Certificate
-  become: yes
-  copy:
-     remote_src: yes
-     dest: /etc/apache2/nextcloud.cert
-     src: "{{certificate_path}}/{{ server_hostname }}/certificate.crt"
+#- name: Copy SSL Certificate
+  #become: yes
+  #copy:
+     #remote_src: yes
+     #dest: /etc/apache2/nextcloud.cert
+     #src: "{{certificate_path}}/{{ server_hostname }}/certificate.crt"
 
 
 - name: Add hostname to /etc/hosts

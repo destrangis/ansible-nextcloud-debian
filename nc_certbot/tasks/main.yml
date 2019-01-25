@@ -1,0 +1,14 @@
+---
+# tasks file for nc_certbot
+- name: Install letsencrypt configuration
+  unarchive:
+    # make sure letsencrypt.tar.gz is the newest possible
+    src: letsencrypt.tar.gz
+    dest: /etc
+  become: yes
+
+- name: Install certbot package
+  apt:
+    name: certbot
+    state: latest
+  become: yes

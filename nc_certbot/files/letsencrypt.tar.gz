@@ -1,0 +1,7 @@
+Dummy file.
+
+replace this file with a recent backup of /etc/letsencrypt
+
+create said backup with the command:
+host:/etc # tar -cvzf letsencrypt.tar.gz letsencrypt/
+
