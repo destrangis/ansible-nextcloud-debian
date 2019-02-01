@@ -1,0 +1,13 @@
+---
+# tasks file for wm_roundcube
+- name: Install roundcube
+  apt:
+     name: "{{ roundcube_software }}"
+     state: latest
+  become: yes
+
+- name: Upload roundcube configuration
+  template:
+     src: config.inc.php.j2
+     dest: /etc/roundcube/config.inc.php
+  become: yes

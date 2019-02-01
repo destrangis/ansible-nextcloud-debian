@@ -1,0 +1,20 @@
+---
+# tasks file for nc_configure_php
+
+- import_tasks: fpm_install.yml
+  when: with_hiawatha
+
+- name: Edit php.ini for Apache2
+  become: yes
+  blockinfile:
+     path: /etc/php/{{php_version}}/apache2/php.ini
+     insertafter: "^\\s*\\[opcache\\]\\s*$"
+     block: |
+        opcache.enable=1
+        opcache.enable_cli=1
+        opcache.interned_strings_buffer=8
+        opcache.max_accelerated_files=10000
+        opcache.memory_consumption=128
+        opcache.save_comments=1
+        opcache.revalidate_freq=1
+  when: not with_hiawatha

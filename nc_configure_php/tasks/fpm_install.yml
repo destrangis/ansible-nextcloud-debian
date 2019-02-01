@@ -1,0 +1,47 @@
+---
+- name: Install php-fpm
+  become: yes
+  apt:
+      name: php-fpm
+      state: latest
+
+- set_fact:
+     fpm_poolfile: "/etc/php/{{php_version}}/fpm/pool.d/www.conf"
+
+- name: Get fpm socket name
+  shell: awk 'BEGIN {FS="="} /^listen\ *=/ {gsub(/ /, "", $2); print $2}' < {{ fpm_poolfile }}
+  register: awkoutput
+
+- set_fact:
+     fpm_socket: "{{awkoutput.stdout_lines[0]}}"
+
+- name: Edit php.ini for FPM
+  become: yes
+  blockinfile:
+     path: /etc/php/{{php_version}}/fpm/php.ini
+     insertafter: "^\\s*\\[opcache\\]\\s*$"
+     block: |
+        opcache.enable=1
+        opcache.enable_cli=1
+        opcache.interned_strings_buffer=8
+        opcache.max_accelerated_files=10000
+        opcache.memory_consumption=128
+        opcache.save_comments=1
+        opcache.revalidate_freq=1
+  when: with_hiawatha
+
+- name: System tuning
+  become: yes
+  lineinfile:
+     path: "{{fpm_poolfile}}"
+     regex: "{{item.regex}}"
+     line: "{{item.subst}}"
+     state: present
+  with_items: "{{tuning_lines}}"
+
+- name: Restart PHP-FPM
+  become: yes
+  systemd:
+     name: php{{php_version}}-fpm
+     state: restarted
+  when: with_hiawatha

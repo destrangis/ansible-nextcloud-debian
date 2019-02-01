@@ -1,0 +1,38 @@
+---
+# tasks file for wm_conf_hiawatha
+- set_fact:
+    cert_name: /etc/letsencrypt/live/{{inventory_hostname}}/key_plus_cert.pem
+  when: not with_selfsigned
+
+- name: Check PHP version
+  shell: ls /etc/php | tail -1
+  register: phpoutput
+- set_fact:
+     php_version: "{{ phpoutput.stdout_lines[0] }}"
+
+- name: Edit php.ini with recommended values
+  become: yes
+  lineinfile:
+     path: /etc/php/{{php_version}}/fpm/php.ini
+     regex: "{{item.regex}}"
+     line: "{{item.subst}}"
+     state: present
+  with_items: "{{php_ini_lines}}"
+
+- name: Configure hiawatha for Roundcube
+  become: yes
+  blockinfile:
+    path: /etc/hiawatha/hiawatha.conf
+    block: "{{roundcube_hiawatha_conf}}"
+
+- name: Restart PHP-FPM
+  become: yes
+  systemd:
+     name: php{{php_version}}-fpm
+     state: restarted
+
+- name: Restart Hiawatha
+  become: yes
+  systemd:
+     name: hiawatha
+     state: restarted

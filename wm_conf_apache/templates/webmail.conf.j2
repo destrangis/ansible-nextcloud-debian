@@ -1,0 +1,89 @@
+
+<VirtualHost *:443>
+   ServerName {{inventory_hostname}}
+   ServerAdmin webmaster@destrangis.com
+   DocumentRoot "/var/lib/roundcube"
+
+   #   SSL Engine Switch:
+   #   Enable/Disable SSL for this virtual host.
+   SSLEngine on
+
+   #   A self-signed (snakeoil) certificate can be created by installing
+   #   the ssl-cert package. See
+   #   /usr/share/doc/apache2.2-common/README.Debian.gz for more info.
+   #   If both key and certificate are stored in the same file, only the
+   #   SSLCertificateFile directive is needed.
+   SSLCertificateFile    {{cert_name}}
+   SSLCertificateKeyFile {{cert_key}}
+   ErrorLog "${APACHE_LOG_DIR}/webmail/secure_error.log"
+   CustomLog "${APACHE_LOG_DIR}/webmail/secure_access.log" common
+
+   #<Directory /var/lib/roundcube>
+     #Options +Indexes +FollowSymLinks +MultiViews
+     #AllowOverride All
+     #Require all granted
+     ##Order allow,deny
+     ##Allow from all
+     ## add any possibly required additional directives here
+     ##    e.g. the Satisfy directive (see below for details):
+     #Satisfy Any
+   #</Directory>
+
+   <Directory /var/lib/roundcube/>
+      Options +FollowSymLinks
+      # This is needed to parse /var/lib/roundcube/.htaccess. See its
+      # content before setting AllowOverride to None.
+      AllowOverride All
+      <IfVersion >= 2.3>
+        Require all granted
+      </IfVersion>
+      <IfVersion < 2.3>
+        Order allow,deny
+        Allow from all
+      </IfVersion>
+    </Directory>
+
+    # Protecting basic directories:
+    <Directory /var/lib/roundcube/config>
+            Options -FollowSymLinks
+            AllowOverride None
+    </Directory>
+
+    <Directory /var/lib/roundcube/temp>
+            Options -FollowSymLinks
+            AllowOverride None
+            <IfVersion >= 2.3>
+              Require all denied
+            </IfVersion>
+            <IfVersion < 2.3>
+              Order allow,deny
+              Deny from all
+            </IfVersion>
+    </Directory>
+
+    <Directory /var/lib/roundcube/logs>
+            Options -FollowSymLinks
+            AllowOverride None
+            <IfVersion >= 2.3>
+              Require all denied
+            </IfVersion>
+            <IfVersion < 2.3>
+              Order allow,deny
+              Deny from all
+            </IfVersion>
+    </Directory>
+
+</VirtualHost>
+
+<VirtualHost *:80>
+   ServerName {{inventory_hostname}}
+   ServerAdmin webmaster@destrangis.com
+   DocumentRoot "/var/www/webmail"
+   ErrorLog "${APACHE_LOG_DIR}/webmail/plain_error.log"
+   CustomLog "${APACHE_LOG_DIR}/webmail/plain_access.log" common
+   <Directory /var/www/webmail>
+     Options +Indexes +FollowSymLinks +MultiViews
+     AllowOverride All
+     Require all granted
+   </Directory>
+</VirtualHost>

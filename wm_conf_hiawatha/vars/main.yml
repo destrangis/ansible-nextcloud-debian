@@ -1,0 +1,46 @@
+---
+php_ini_lines:
+   - regex: "^\ *display_errors\ *="
+     subst: "display_errors = Off"
+   - regex:  "^\ *log_errors\ *="
+     subst: "log_errors = On"
+   - regex:  "^\ *upload_max_filesize\ *="
+     subst: "upload_max_filesize = 5M"
+   - regex:  "^\ *post_max_size\ *="
+     subst: "post_max_size = 6M"
+   - regex:  "^\ *memory_limit\ *="
+     subst: "memory_limit = 64M"
+   - regex:  "^\ *session.auto_start\ *="
+     subst:  "session.auto_start = Off"
+   - regex:  "^\ *session.gc_maxlifetime\ *="
+     subst: "session.gc_maxlifetime = 21600"
+   - regex: "^\ *session.gc_divisor\ *="
+     subst: "session.gc_divisor = 500"
+   - regex: "^\ *session.gc_probability\ *="
+     subst: "session.gc_probability = 1"
+
+roundcube_hiawatha_conf: |
+    UrlToolkit {
+        ToolkitID = roundcube
+        Match ^/favicon.ico$ Rewrite /skins/larry/images/favicon.ico
+        Match ^(!installer|\.well-known\/|[a-zA-Z0-9]{16})(\.?[^\.]+)$ DenyAccess
+        Match ^/?(\.git|\.tx|SQL|bin|config|logs|plugins/enigma/home|temp|tests|program\/(include|lib|localization|steps)) DenyAccess
+        Match ^/vendor\/bin\/.* DenyAccess
+        Match /?(README\.md|composer\.json-dist|composer\.json|package\.xml|jsdeps.json|Dockerfile)$ DenyAccess
+    }
+
+    VirtualHost {
+        Hostname = {{inventory_hostname}}
+        TLScertFile = {{cert_name}}
+        WebsiteRoot = /var/lib/roundcube
+        StartFile = index.php
+        UseFastCGI = PHP7
+        TimeForCGI = 1200
+        AccessLogfile = /var/log/hiawatha/wm2_access.log
+        ErrorLogfile = /var/log/hiawatha/wm2_error.log
+        RequireTLS = yes
+        UseToolkit = roundcube
+
+        CustomHeader = Strict-Transport-Security: max-age=31536000; preload
+        CustomHeader = X-Robots-Tag: noindex, nofollow
+    }

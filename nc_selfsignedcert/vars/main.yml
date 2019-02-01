@@ -2,3 +2,7 @@
 # vars file for nc_selfsignedcert
 certificate_path: /usr/local/etc/ssl_certificates
 server_hostname: "{{inventory_hostname}}"
+cert_dir: "{{certificate_path}}/{{server_hostname}}"
+cert_only_name: "{{cert_dir}}/plaincert.pem"
+cert_key: "{{cert_dir}}/privkey.pem"
+cert_name: "{{cert_dir}}/fullchain.pem"

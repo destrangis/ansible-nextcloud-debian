@@ -1,0 +1,15 @@
+---
+# vars file for nc_configure_php
+tuning_lines:
+   - regex: "^pm\ *="
+     subst: "pm = dynamic"
+   - regex: "^pm.max_children\ *="
+     subst: "pm.max_children = 80"
+   - regex: "^pm.start_servers\ *="
+     subst: "pm.start_servers = 8"
+   - regex: "^pm.min_spare_servers\ *="
+     subst: "pm.min_spare_servers = 4"
+   - regex: "^pm.max_spare_servers\ *="
+     subst: "pm.max_spare_servers = 8"
+   - regex: "clear_env\ *="
+     subst: "clear_env = no"

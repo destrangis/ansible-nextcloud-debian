@@ -12,3 +12,11 @@
     name: certbot
     state: latest
   become: yes
+
+- set_fact:
+    main_cert_dir: /etc/letsencrypt/live
+    cert_dir:  "/etc/letsencrypt/live/{{inventory_hostname}}"
+    cert_only_name: "/etc/letsencrypt/live/{{inventory_hostname}}/fullchain.pem"
+    cert_key: "/etc/letsencrypt/live/{{inventory_hostname}}/privkey.pem"
+- set_fact:
+    cert_name: "{{cert_dir}}/key_plus_cert.pem"

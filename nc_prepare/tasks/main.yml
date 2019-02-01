@@ -13,3 +13,9 @@
      state: latest
      name: "{{ needed_packages }}"
   become: yes
+
+- name: Check PHP version
+  shell: ls /etc/php | tail -1
+  register: phpoutput
+- set_fact:
+     php_version: "{{ phpoutput.stdout_lines[0] }}"

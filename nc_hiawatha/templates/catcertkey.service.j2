@@ -1,0 +1,9 @@
+[Unit]
+Description=Setup SSL Cert for Hiawatha
+Requires=certbot.service
+After=certbot.service
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/catcertkey {{main_cert_dir}}
+[Install]
+WantedBy=certbot.service

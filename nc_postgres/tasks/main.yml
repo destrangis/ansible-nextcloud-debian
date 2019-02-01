@@ -1,8 +1,14 @@
 ---
 # tasks file for nc_postgres
+- name: check postgres version
+  shell: ls /etc/postgresql | tail -1
+  register: pgoutput
+- set_fact:
+     postgres_version: "{{ pgoutput.stdout_lines[0] }}"
+
 - name: Require local users to use md5 passwords
   replace:
-     path: "/etc/postgresql/9.6/main/pg_hba.conf"
+     path: "/etc/postgresql/{{postgres_version}}/main/pg_hba.conf"
      regexp: '^[^#\n]*local\s+all\s+all\s+peer\s*$'
      replace: "local   all    all   md5"
   register: repl_output
@@ -21,11 +27,18 @@
   become_user: postgres
   become: yes
 
+- name: Drop the nextcloud database if present
+  postgresql_db:
+     name: nextcloud
+     owner: "{{ pg_username }}"
+     state: absent
+  become_user: postgres
+  become: yes
+
 - name: Create the nextcloud database
   postgresql_db:
      name: nextcloud
      owner: "{{ pg_username }}"
+     state: present
   become_user: postgres
   become: yes
-
-

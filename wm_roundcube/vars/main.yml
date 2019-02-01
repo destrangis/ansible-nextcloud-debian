@@ -1,0 +1,7 @@
+---
+# vars file for wm_roundcube
+roundcube_software:
+    - roundcube-core
+    - roundcube-pgsql
+    - roundcube-plugins
+    - roundcube

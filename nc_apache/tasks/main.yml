@@ -1,9 +1,9 @@
 ---
 # tasks file for nc_apache
 - name: Upload nextcloud.conf
-  copy:
-      dest: /etc/apache2/sites-available
-      src: nextcloud.conf
+  template:
+      dest: /etc/apache2/sites-available/nextcloud.conf
+      src: nextcloud.conf.j2
   become: yes
 
 - name: Create /var/www/nextcloud directory

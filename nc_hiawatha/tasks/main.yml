@@ -1,0 +1,41 @@
+---
+# tasks file for nc_hiawatha
+
+- name: Disable Apache
+  become: yes
+  systemd:
+     name: apache2
+     state: stopped
+     enabled: no
+
+- name: Find host architecture
+  shell: dpkg-architecture -q'DEB_HOST_ARCH'
+  register: arch
+- set_fact:
+     hiawatha_package: "{{hiawatha_version}}_{{arch.stdout}}.deb"
+
+- name: Upload hiawatha package
+  copy:
+     src: "{{hiawatha_package}}"
+     dest: /tmp
+
+- name: Install Hiawatha webserver
+  become: yes
+  apt:
+     deb: /tmp/{{hiawatha_package}}
+
+- name: Configure Hiawatha
+  become: yes
+  template:
+     src: hiawatha.conf.j2
+     dest: /etc/hiawatha/hiawatha.conf
+
+- import_tasks: catcertkey.yml
+  when: not with_selfsigned
+
+- name: Restart Hiawatha
+  become: yes
+  systemd:
+     name: hiawatha
+     state: restarted
+     enabled: yes

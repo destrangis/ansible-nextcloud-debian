@@ -3,25 +3,30 @@
 - name: Ensure certificates directory
   become: yes
   file:
-     dest: "{{certificate_path}}/{{ server_hostname }}/"
+     dest: "{{cert_dir}}/"
      state: directory
+     mode: 0700
 
 - name: Generate an OpenSSL private key.
   become: yes
   openssl_privatekey:
-    path: "{{certificate_path}}/{{ server_hostname }}/privkey.key"
+    path: "{{cert_key}}"
 
 - name: Generate an OpenSSL CSR.
   become: yes
   openssl_csr:
-    path: "{{certificate_path}}/{{ server_hostname }}.csr"
-    privatekey_path: "{{certificate_path}}/{{ server_hostname }}/privkey.key"
+    path: "{{cert_dir}}/request.csr"
+    privatekey_path: "{{cert_key}}"
     common_name: "{{ server_hostname }}"
 
 - name: Generate a Self Signed OpenSSL certificate.
   become: yes
   openssl_certificate:
-    path: "{{certificate_path}}/{{ server_hostname }}/certificate.crt"
-    privatekey_path: "{{certificate_path}}/{{ server_hostname }}/privkey.key"
-    csr_path: "{{certificate_path}}/{{ server_hostname }}.csr"
+    path: "{{cert_only_name}}"
+    privatekey_path: "{{cert_key}}"
+    csr_path: "{{cert_dir}}/request.csr"
     provider: selfsigned
+
+- name: Create final cert with key and cert
+  become: yes
+  shell: cat {{cert_key}} {{cert_only_name}} > {{cert_name}}

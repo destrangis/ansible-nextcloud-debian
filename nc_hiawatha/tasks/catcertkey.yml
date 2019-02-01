@@ -1,0 +1,25 @@
+---
+- name: Install catcertkey script
+  become: yes
+  copy:
+     src: catcertkey.py
+     dest: /usr/local/bin/catcertkey
+     mode: 0755
+
+- name: Copy catcertkey systemd service
+  become: yes
+  template:
+     src: catcertkey.service.j2
+     dest: /etc/systemd/system/catcertkey.service
+
+- name: Enable catcertkey service
+  become: yes
+  systemd:
+      name: catcertkey
+      enabled: yes
+
+- name: Run catcerkey service
+  become: yes
+  systemd:
+      name: catcertkey
+      state: restarted
