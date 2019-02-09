@@ -13,3 +13,13 @@ tuning_lines:
      subst: "pm.max_spare_servers = 8"
    - regex: "clear_env\ *="
      subst: "clear_env = no"
+
+php_ini_lines:
+   - regex: "^memory_limit\ *="
+     subst: "memory_limit = 256M"
+   - regex: "^max_execution_time\ *="
+     subst: "max_execution_time = 1200"
+   - regex: "^post_max_size\ *="
+     subst: "post_max_size = 0"
+   - regex: "^upload_max_filesize\ *="
+     subst: "upload_max_filesize = 2G"

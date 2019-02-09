@@ -15,7 +15,7 @@
 - set_fact:
      fpm_socket: "{{awkoutput.stdout_lines[0]}}"
 
-- name: Edit php.ini for FPM
+- name: Edit opcache section in php.ini for FPM
   become: yes
   blockinfile:
      path: /etc/php/{{php_version}}/fpm/php.ini
@@ -28,7 +28,16 @@
         opcache.memory_consumption=128
         opcache.save_comments=1
         opcache.revalidate_freq=1
-  when: with_hiawatha
+
+- name: Edit max values in FPM's php.ini
+  become: yes
+  lineinfile:
+     path: /etc/php/{{php_version}}/fpm/php.ini
+     regex: "{{item.regex}}"
+     line: "{{item.subst}}"
+     state: present
+  with_items: "{{php_ini_lines}}"
+
 
 - name: System tuning
   become: yes
