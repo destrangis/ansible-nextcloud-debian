@@ -28,6 +28,7 @@ Binding {
 Binding {
     Port = 443
     TLScertFile = {{cert_name}}
+    MaxRequestSize = 20480
 }
 
 #
@@ -121,7 +122,7 @@ UrlToolkit {
     Match ^/remote/([^?]*)(\?.*)? Redirect /remote.php$2
     Match ^/(build|tests|config|lib|3rdparty|templates) DenyAccess
     Match ^/.well-known/acme-challenge/.* Return
-    Match ^/(\.|autotest|occ|issue|indie|db_|console).* DenyAccess
+    Match ^/(autotest|occ|issue|indie|db_|console).* DenyAccess
 }
 
 # VIRTUAL HOSTS
@@ -129,10 +130,10 @@ UrlToolkit {
 #
 VirtualHost {
     Hostname = {{server_hostname}}
-    #TLScertFile = /etc/letsencrypt/live/oc.destrangis.com/fullchain.pem
     TLScertFile = {{cert_name}}
+    AllowDotFiles = yes
     WebsiteRoot = /opt/nextcloud
-    StartFile = index.html
+    StartFile = index.php
     AccessLogfile = /var/log/hiawatha/nc2_access.log
     ErrorLogfile = /var/log/hiawatha/nc2_error.log
     UseFastCGI = PHP7
