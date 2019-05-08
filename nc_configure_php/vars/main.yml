@@ -16,7 +16,7 @@ tuning_lines:
 
 php_ini_lines:
    - regex: "^memory_limit\ *="
-     subst: "memory_limit = 256M"
+     subst: "memory_limit = 512M"
    - regex: "^max_execution_time\ *="
      subst: "max_execution_time = 1200"
    - regex: "^post_max_size\ *="
